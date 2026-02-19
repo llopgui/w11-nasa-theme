@@ -71,6 +71,22 @@ if ($wallpaperCount -eq 0) {
 } else {
     Write-Host "      [OK] $wallpaperCount wallpapers instalados" -ForegroundColor Green
 }
+
+# Acceso directo en el escritorio hacia la carpeta de wallpapers
+$DesktopPath = [Environment]::GetFolderPath("Desktop")
+$ShortcutPath = Join-Path $DesktopPath "NASA Wallpapers.lnk"
+try {
+    $WshShell = New-Object -ComObject WScript.Shell
+    $Shortcut = $WshShell.CreateShortcut($ShortcutPath)
+    $Shortcut.TargetPath = $NASA_DesktopPath
+    $Shortcut.WorkingDirectory = $NASA_DesktopPath
+    $Shortcut.Description = "Carpeta de wallpapers del tema NASA. Añade aquí nuevas imágenes para el slideshow."
+    $Shortcut.Save()
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($WshShell) | Out-Null
+    Write-Host "      [OK] Acceso directo creado en el escritorio: NASA Wallpapers" -ForegroundColor Green
+} catch {
+    Write-Host "      ADVERTENCIA: No se pudo crear el acceso directo en el escritorio." -ForegroundColor Yellow
+}
 Write-Host ""
 
 # 1b. Copiar cursores W11 Tail Cursor (Jepri Creations)
@@ -197,6 +213,7 @@ Write-Host "  - Configuracion > Personalizacion > Temas" -ForegroundColor White
 if ($wallpaperCount -gt 0) {
     Write-Host "  - Wallpapers: $wallpaperCount imagenes (slideshow cada 10 min)" -ForegroundColor White
 }
+Write-Host "  - Acceso directo en escritorio: NASA Wallpapers (añade ahí nuevas imagenes)" -ForegroundColor White
 if ($cursorCount -gt 0) {
     Write-Host "  - Cursores: W11 Tail Cursor por Jepri Creations" -ForegroundColor White
     Write-Host "    https://www.deviantart.com/jepricreations" -ForegroundColor Cyan

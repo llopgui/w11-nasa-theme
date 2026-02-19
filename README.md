@@ -64,7 +64,7 @@ w11-nasa-theme/
 
 | Carpeta | Contenido |
 |---------|-----------|
-| `assets/wallpapers/` | Imágenes jpg, png, bmp (slideshow cada 10 min) |
+| `assets/wallpapers/` | Imágenes jpg, png, bmp (slideshow cada 10 min). Ver [README de wallpapers](assets/wallpapers/README.md) para añadir nuevas y normalizarlas (≥1920×1080). |
 | `assets/sounds/` | Archivos .wav (ver README para nombres) |
 | `assets/cursors/` | Pack W11 Tail Cursor ya incluido |
 
