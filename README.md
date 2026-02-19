@@ -19,7 +19,7 @@ Tema profesional para Windows 11 con temática espacial inspirado en el **NASA W
 
 ```powershell
 # Clonar o descargar el repositorio
-git clone https://github.com/<tu-usuario>/w11-nasa-theme.git
+git clone https://github.com/llopgui/w11-nasa-theme.git
 cd w11-nasa-theme
 
 # Instalar tema oscuro
