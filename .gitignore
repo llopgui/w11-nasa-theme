@@ -17,6 +17,8 @@ desktop.ini
 
 # GitHub
 .github/
+.git/
+
 
 # User assets (optional - uncomment to exclude large files from repo)
 # assets/wallpapers/*.jpg
