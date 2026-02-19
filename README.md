@@ -1,6 +1,6 @@
 # NASA Space Theme for Windows 11
 
-Tema profesional para Windows 11 con temática espacial inspirado en el **NASA Web Design System**. Incluye variantes oscuro y claro, paleta de colores oficial NASA, cursores personalizados y soporte para sonidos y wallpapers.
+Tema para Windows 11 con temática espacial inspirado en el **NASA Web Design System**. Incluye variantes oscuro y claro, paleta de colores oficial NASA, cursores personalizados y soporte para sonidos y wallpapers.
 
 ![Windows 11](https://img.shields.io/badge/Windows-11-0078D4?logo=windows)
 ![PowerShell](https://img.shields.io/badge/PowerShell-5.1+-5391FE?logo=powershell)
