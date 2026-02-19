@@ -76,7 +76,7 @@ Este proyecto usa **WTFPL** (permisiva). Además, aplican:
 
 ```bash
 # Hacer fork del repositorio en GitHub
-git clone https://github.com/TU_USUARIO/w11-nasa-theme.git
+git clone https://github.com/llopgui/w11-nasa-theme.git
 cd w11-nasa-theme
 ```
 
