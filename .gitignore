@@ -1,0 +1,24 @@
+# Python / Mypy (legacy)
+.mypy_cache/
+__pycache__/
+*.py[cod]
+*.pyo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# GitHub
+.github/
+
+# User assets (optional - uncomment to exclude large files from repo)
+# assets/wallpapers/*.jpg
+# assets/wallpapers/*.png
+# assets/sounds/*.wav

@@ -1,0 +1,122 @@
+; =============================================================================
+; NASA Theme - Tema Claro (Light Mode)
+; Inspirado en la paleta oficial de la NASA Web Design System
+; Colores: White (#ffffff), Primary Blue (#105bd8), Gray Light (#aeb0b5)
+; =============================================================================
+
+[Theme]
+DisplayName=NASA Space - Tema Claro
+
+[MasterThemeSelector]
+MTSM=DABJDKT
+
+[Control Panel\Desktop]
+TileWallpaper=0
+WallpaperStyle=10
+Pattern=
+ScreenSaveActive=0
+
+[Slideshow]
+; Cambia de wallpaper cada 10 minutos (600000 ms)
+Interval=600000
+Shuffle=1
+ImagesRootPath=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop
+
+[Control Panel\Colors]
+; Paleta NASA - Tema Claro Espacial
+; Background: blanco NASA (#ffffff)
+Background=255 255 255
+; Ventanas: gris muy claro (#f1f1f1)
+Window=241 241 241
+WindowText=33 33 33
+; Barra de título activa: azul NASA (#105bd8)
+ActiveTitle=16 91 216
+TitleText=255 255 255
+Hilight=16 91 216
+HilightText=255 255 255
+; Barra de título inactiva
+InactiveTitle=220 228 239
+InactiveTitleText=33 33 33
+; Botones y controles
+ButtonFace=241 241 241
+ButtonText=33 33 33
+ButtonShadow=214 208 200
+ButtonHilight=2 191 231
+ButtonDkShadow=91 97 107
+ButtonLight=255 255 255
+; Menús
+Menu=255 255 255
+MenuText=33 33 33
+; Barras de desplazamiento
+Scrollbar=214 208 200
+; Bordes
+WindowFrame=16 91 216
+ActiveBorder=16 91 216
+InactiveBorder=214 208 200
+; Otros elementos
+AppWorkspace=220 228 239
+GrayText=174 176 181
+InfoWindow=255 255 255
+InfoText=33 33 33
+GradientActiveTitle=16 91 216
+GradientInactiveTitle=220 228 239
+
+[Control Panel\Cursors]
+; Cursores personalizados desde cursors\ (si existen)
+Arrow=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\arrow.cur
+Help=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\help.cur
+Hand=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\hand.cur
+AppStarting=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\appstarting.ani
+Wait=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\wait.ani
+NWPen=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\nwpen.cur
+No=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\no.cur
+SizeNS=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\sizens.cur
+SizeWE=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\sizewe.cur
+Crosshair=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\crosshair.cur
+IBeam=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\ibeam.cur
+SizeNWSE=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\sizenwse.cur
+SizeNESW=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\sizenesw.cur
+SizeAll=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\sizeall.cur
+UpArrow=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\uparrow.cur
+Person=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\person.cur
+Pin=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\pin.cur
+DefaultValue=Windows default
+
+[AppEvents\Schemes\Apps\.Default\SystemStart]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\systemstart.wav
+[AppEvents\Schemes\Apps\.Default\SystemExit]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\systemexit.wav
+[AppEvents\Schemes\Apps\.Default\SystemExclamation]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\systemexclamation.wav
+[AppEvents\Schemes\Apps\.Default\SystemHand]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\systemhand.wav
+[AppEvents\Schemes\Apps\.Default\SystemQuestion]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\systemquestion.wav
+[AppEvents\Schemes\Apps\.Default\SystemAsterisk]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\systemasterisk.wav
+[AppEvents\Schemes\Apps\.Default\MenuCommand]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\menucommand.wav
+[AppEvents\Schemes\Apps\.Default\MenuPopup]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\menupopup.wav
+[AppEvents\Schemes\Apps\.Default\Open]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\open.wav
+[AppEvents\Schemes\Apps\.Default\Close]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\close.wav
+[AppEvents\Schemes\Apps\.Default\Minimize]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\minimize.wav
+[AppEvents\Schemes\Apps\.Default\Maximize]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\maximize.wav
+[AppEvents\Schemes\Apps\.Default\RestoreDown]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\restoredown.wav
+[AppEvents\Schemes\Apps\.Default\RestoreUp]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\restoreup.wav
+[AppEvents\Schemes\Apps\Explorer\EmptyRecycleBin]
+DefaultValue=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Sounds\emptyrecyclebin.wav
+
+[VisualStyles]
+Path=%SystemRoot%\Resources\Themes\Aero\Aero.msstyles
+ColorStyle=NormalColor
+Size=NormalSize
+; Color de acento: Azul NASA #105bd8
+ColorizationColor=0x6BD85B10
+Transparency=1
