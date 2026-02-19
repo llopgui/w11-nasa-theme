@@ -18,7 +18,16 @@ desktop.ini
 # GitHub
 .github/
 .git/
+.gitignore
 
+# Scripts
+scripts/normalize-wallpapers.py
+scripts/requirements.txt
+build-normalize-exe.ps1
+
+# Build
+scripts/dist/
+NASA-Normalize-Wallpapers.spec
 
 # User assets (optional - uncomment to exclude large files from repo)
 # assets/wallpapers/*.jpg
