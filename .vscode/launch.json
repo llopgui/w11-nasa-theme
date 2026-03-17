@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: normalize-wallpapers (dry-run)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/normalize-wallpapers.py",
+      "args": ["--dry-run"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: normalize-wallpapers",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/normalize-wallpapers.py",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "PowerShell: install.ps1",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/scripts/install.ps1",
+      "args": ["-Theme", "dark", "-NoRestart"],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+---
+description: Estándares de código Python para scripts del proyecto
+globs: scripts/**/*.py
+alwaysApply: false
+---
+
+# Python - w11-nasa-theme
+
+## Estilo y formato
+
+- Indentación: 4 espacios
+- Docstrings en español para módulos y funciones públicas
+- Type hints en firmas de funciones
+
+## Manejo de errores
+
+```python
+# Capturar excepciones específicas
+except (OSError, ValueError, MemoryError) as e:
+    print(f"  [ERROR] {path.name}: {e}")
+    return False
+```
+
+## Imports
+
+- Orden: stdlib → terceros → locales
+- `from pathlib import Path` para rutas; evitar `os.path` cuando sea posible
+
+## Pillow
+
+- Usar `Image.LANCZOS` para resampling de alta calidad
+- Convertir a RGB antes de guardar JPEG (imágenes con canal alpha)

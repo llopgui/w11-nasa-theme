@@ -1,0 +1,4 @@
+# Dependencias para scripts de procesamiento de imágenes
+# Uso: pip install -r requirements.txt
+
+Pillow>=10.0.0

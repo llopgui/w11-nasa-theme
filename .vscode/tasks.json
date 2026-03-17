@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Instalar tema (dark)",
+      "type": "shell",
+      "command": "powershell",
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/install.ps1", "-Theme", "dark", "-NoRestart"],
+      "group": "build",
+      "presentation": { "reveal": "always" }
+    },
+    {
+      "label": "Normalizar wallpapers (dry-run)",
+      "type": "shell",
+      "command": "python",
+      "args": ["${workspaceFolder}/scripts/normalize-wallpapers.py", "--dry-run"],
+      "group": "build",
+      "presentation": { "reveal": "always" }
+    },
+    {
+      "label": "Build exe (normalizador)",
+      "type": "shell",
+      "command": "powershell",
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/build-normalize-exe.ps1"],
+      "group": "build",
+      "presentation": { "reveal": "always" }
+    }
+  ]
+}
