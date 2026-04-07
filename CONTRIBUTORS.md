@@ -16,7 +16,7 @@
 Este proyecto es **"por y para la comunidad de amantes del espacio"**:
 
 - 🌌 **Educativo y sin fines comerciales** - Solo por amor a la astronomía
-- 🎨 **Accesible para todos** - Windows temas que cualquiera pueda disfrutar
+- 🎨 **Accesible para todos** - Temas para Windows que cualquiera pueda disfrutar
 - 📖 **Código abierto** - Transparente y colaborativo
 - ⚖️ **Respetuoso con NASA** - Cumpliendo estrictamente sus guidelines
 - 🤝 **Comunitario** - Las mejores ideas vienen de todos nosotros
@@ -152,7 +152,7 @@ Background=45 35 75  ; Mystical - Fondo principal
 
 ### ✅ **Checklist de Calidad**
 
-- [ ] **Funciona correctamente** en Windows 10/11
+- [ ] **Funciona correctamente** en Windows 11 (alcance del proyecto; ver [README](README.md))
 - [ ] **Sigue las NASA Guidelines** (no comercial, atribución)
 - [ ] **Documentación actualizada** si es necesario
 - [ ] **Respeta la licencia** WTFPL y atribuciones de [CREDITS.md](CREDITS.md) (cursores, NASA)

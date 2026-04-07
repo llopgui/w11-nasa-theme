@@ -15,9 +15,9 @@ alwaysApply: false
 ## Manejo de errores
 
 ```python
-# Capturar excepciones específicas
-except (OSError, ValueError, MemoryError) as e:
-    print(f"  [ERROR] {path.name}: {e}")
+# Errores operativos a stderr; incluir DecompressionBombError si se usa Pillow con imágenes grandes
+except (OSError, ValueError, MemoryError, DecompressionBombError) as e:
+    print(f"  [ERROR] {path.name}: {e}", file=sys.stderr)
     return False
 ```
 
@@ -28,5 +28,6 @@ except (OSError, ValueError, MemoryError) as e:
 
 ## Pillow
 
-- Usar `Image.LANCZOS` para resampling de alta calidad
+- Resampling: `Image.Resampling.LANCZOS` (Pillow ≥ 10); la forma antigua `Image.LANCZOS` está deprecada
+- Aplicar `ImageOps.exif_transpose` tras abrir si la orientación EXIF importa
 - Convertir a RGB antes de guardar JPEG (imágenes con canal alpha)

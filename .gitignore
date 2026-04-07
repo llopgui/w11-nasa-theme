@@ -1,5 +1,15 @@
 *.pyc
 
-docs/PLAN-CORRECCIONES.md
-docs/plan.md
-docs/research.md
+.cursorignore
+.gitignore
+.editorconfig
+pyproject.toml
+
+docs/
+__pycache__/
+.mypy_cache/
+.atl/
+.cursor/
+.git/
+.venv/
+.vscode/

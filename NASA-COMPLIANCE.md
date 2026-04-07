@@ -1,18 +1,20 @@
 # 🚀 NASA Brand Compliance - Cumplimiento con Directrices de NASA
 
-## ⚠️ IMPORTANTE - Este Proyecto Cumple con NASA Brand Guidelines
+## ⚠️ IMPORTANTE - Declaración respecto a NASA Brand Guidelines
 
-Este documento certifica que el **NASA Theme Project** cumple estrictamente con las [NASA Brand Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) establecidas por la Agencia Espacial de Estados Unidos.
+Este documento describe cómo el **NASA Theme Project** pretende alinearse con las [NASA Brand Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/). Las guías oficiales pueden cambiar; conviene revisar el [NASA Brand Center](https://www.nasa.gov/nasa-brand-center/) periódicamente. Esto **no** es asesoramiento legal ni una garantía de aprobación por parte de NASA.
 
 ## 📋 Verificación de Cumplimiento
 
-### ✅ **Uso No Comercial Exclusivo**
+### ✅ **Uso no comercial del contenido NASA (política del proyecto)**
 
 - ✅ **Proyecto GRATUITO** - Sin costo alguno para los usuarios
-- ✅ **Código abierto** - Disponible en GitHub bajo licencia WTFPL
+- ✅ **Código abierto** - Disponible en GitHub bajo licencia WTFPL (ver aclaración abajo)
 - ✅ **Sin monetización** - No hay publicidad, ventas, o generación de ingresos
-- ✅ **Distribución libre** - Permitida redistribución no comercial
-- ❌ **USO COMERCIAL PROHIBIDO** - Según NASA Guidelines y licencia del proyecto
+- ✅ **Distribución libre** - Redistribución no comercial del material NASA según esta política
+- ❌ **Uso comercial del contenido NASA** - No está permitido en este proyecto, en línea con NASA Brand Guidelines y la política aquí descrita
+
+**Aclaración sobre la licencia del código (WTFPL):** la WTFPL es muy permisiva y **no** impone por sí misma prohibición de uso comercial del *código*. Las restricciones de **uso no comercial** y de **marca/contenido NASA** aplican a **cómo se usa y redistribuye este proyecto y sus assets NASA**, no a una interpretación incorrecta de la WTFPL como “licencia que prohíbe lo comercial” en abstracto.
 
 ### ✅ **Atribución Correcta a NASA**
 
@@ -33,7 +35,7 @@ Este documento certifica que el **NASA Theme Project** cumple estrictamente con 
 - ✅ **Propósito educativo** - Promoción del interés en ciencia espacial
 - ✅ **Contenido informativo** - Documentación sobre misiones y descubrimientos
 - ✅ **Inspiración científica** - Fomenta el interés en astronomía y exploración espacial
-- ✅ **Material público** - Uso de contenido de dominio público de NASA
+- ✅ **Material de divulgación** - Se priorizan fuentes NASA de acceso público; el estatus legal puede variar por obra (ver sección legal más abajo).
 
 ## 🖼️ Fuentes Oficiales de Imágenes NASA
 
@@ -66,14 +68,14 @@ Todas las imágenes utilizadas provienen exclusivamente de las siguientes fuente
 
 - **Tipo**: WTFPL (Do What The Fuck You Want To Public License)
 - **Archivo**: [LICENSE](LICENSE)
-- **Características**: Permisiva; el proyecto impone **restricciones adicionales** para contenido NASA (ver abajo)
-- **Política del proyecto**: Uso no comercial para wallpapers/imágenes NASA; atribución requerida; sin endorsement
+- **Qué cubre la WTFPL**: el **código** del repositorio; es permisiva (no sustituye las obligaciones de marca/imagen de NASA).
+- **Qué añade este proyecto**: política explícita de **uso no comercial** de contenido NASA, **atribución** y **sin endorsement** (ver secciones siguientes). Eso es **independiente** de la letra de la WTFPL.
 
 ### **Status Legal de Imágenes NASA**
 
-- **Dominio público** - La mayoría de contenido NASA es de dominio público
-- **Sin copyright** - Libre uso para propósitos educativos e informativos
-- **Política de NASA** - Fomenta el uso público de sus materiales científicos
+- **Dominio público (EE. UU.)** - Muchas obras de NASA están en dominio público en Estados Unidos; pueden existir excepciones (terceros, condiciones por imagen o por fuente).
+- **Condiciones por recurso** - Revisá la página de cada obra y las guías vigentes; el uso educativo no sustituye créditos u obligaciones específicas cuando existan.
+- **Política de NASA** - En general fomenta el uso público de materiales científicos cuando las condiciones de la obra lo permiten.
 
 ### **Restricciones Aplicadas**
 
@@ -107,7 +109,7 @@ Todas las imágenes utilizadas provienen exclusivamente de las siguientes fuente
 ### **Recursos NASA Oficiales**
 
 - 📋 [**NASA Brand Guidelines**](https://www.nasa.gov/nasa-brand-center/images-and-media/)
-- 📧 [**NASA Media Team**](mailto:nasa-merchandise-&-brand-team@mail.nasa.gov)
+- 📧 **Contacto de marca / medios:** usá el canal indicado en [**NASA Brand Center**](https://www.nasa.gov/nasa-brand-center/) (evitamos `mailto:` con caracteres ambiguos en el texto; el centro oficial lista los medios de contacto vigentes).
 - 🌐 [**NASA Official Website**](https://www.nasa.gov/)
 
 ### **Marco Legal Adicional**
@@ -117,12 +119,12 @@ Todas las imágenes utilizadas provienen exclusivamente de las siguientes fuente
 
 ---
 
-## ✅ Certificación de Cumplimiento
+## ✅ Compromiso del proyecto
 
-**Este proyecto ha sido desarrollado con el máximo respeto hacia NASA y sus contribuciones a la ciencia y exploración espacial. Cumplimos estrictamente con todas las directrices establecidas y mantenemos un compromiso continuo con el uso ético y legal del contenido NASA.**
+**Este proyecto se desarrolla con respeto hacia NASA y su divulgación científica.** Se intenta seguir las directrices públicas de marca y uso de imágenes; ante cambios en las políticas de NASA, actualizá la documentación y el contenido del repositorio en consecuencia. Esto expresa **intención y buenas prácticas**, no una certificación legal emitida por NASA.
 
-**Fecha de última revisión**: Junio 2025
-**Próxima revisión programada**: Diciembre 2025
+**Fecha de última revisión**: Abril 2026
+**Próxima revisión programada**: Octubre 2026 (revisión semestral orientativa)
 
 ---
 

@@ -2,7 +2,7 @@
   "editor.formatOnSave": true,
   "editor.tabSize": 4,
   "editor.insertSpaces": true,
-  "editor.rulers": [100],
+  "editor.rulers": [180],
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
   "files.encoding": "utf8",
@@ -28,5 +28,10 @@
     "editor.tabSize": 2,
     "editor.wordWrap": "on"
   },
-  "cSpell.words": ["Jepri", "pycache"]
+  "cSpell.words": [
+    "Jepri",
+    "pycache"
+  ],
+  "cursorpyright.analysis.autoImportCompletions": true,
+  "cursorpyright.analysis.typeCheckingMode": "basic"
 }

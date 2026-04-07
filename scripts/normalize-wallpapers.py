@@ -6,9 +6,10 @@ Ejecutar contra la carpeta donde están instalados los wallpapers del tema NASA
 (%LOCALAPPDATA%\\Microsoft\\Windows\\Themes\\NASA_Desktop). Para cuando el usuario
 añade imágenes nuevas al slideshow.
 
-Solo procesa imágenes >= 1920x1080. Las menores se mueven a descartadas/.
-Las originales aptas se mueven a backup/ antes de generar el JPG normalizado.
-Las carpetas backup/ y descartadas/ no las usa el slideshow.
+Solo procesa imágenes cuyo ancho y alto son ambos >= 1920 y 1080 (por defecto).
+Las menores se mueven a descartadas/. Las originales aptas se mueven a backup/
+antes de generar el JPG normalizado. Las carpetas backup/ y descartadas/ suelen
+quedar fuera del patrón del slideshow del .theme (solo se listan JPG en la raíz).
 
 Uso:
     python scripts/normalize-wallpapers.py
@@ -19,14 +20,20 @@ Uso:
 import argparse
 import os
 import shutil
+import sys
+import uuid
+from collections import defaultdict
 from pathlib import Path
 
 try:
-    from PIL import Image  # type: ignore[import-untyped]
+    from PIL import Image, ImageOps  # type: ignore[import-untyped]
     from PIL.Image import DecompressionBombError  # type: ignore[import-untyped]
 except ImportError:
-    print("Error: Se requiere Pillow. Ejecuta: pip install Pillow")
-    exit(1)
+    print("Error: Se requiere Pillow. Ejecuta: pip install Pillow", file=sys.stderr)
+    sys.exit(1)
+
+# Límite de descompresión: mitiga imágenes corruptas o hostiles; suficiente para panorámicas 4K/8K habituales.
+Image.MAX_IMAGE_PIXELS = 100_000_000
 
 # Configuración por defecto
 DEFAULT_WIDTH = 1920
@@ -38,6 +45,28 @@ SUPPORTED_INPUT_FORMATS = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".w
 # Carpetas internas de wallpapers (no se procesan ni usa el slideshow)
 BACKUP_SUBDIR = "backup"
 DISCARDED_SUBDIR = "descartadas"
+
+
+def _eprint(message: str) -> None:
+    """Escribe un mensaje en stderr (errores y advertencias operativas)."""
+    print(message, file=sys.stderr)
+
+
+def _image_has_transparency(img: Image.Image) -> bool:
+    """
+    Indica si la imagen puede tener zonas transparentes (alpha o paleta con transparencia).
+
+    Args:
+        img: Imagen ya abierta con Pillow.
+
+    Returns:
+        True si conviene advertir al convertir a JPEG.
+    """
+    if img.mode in ("RGBA", "LA"):
+        return True
+    if img.mode == "P" and "transparency" in img.info:
+        return True
+    return False
 
 
 def get_installed_wallpapers_path() -> Path:
@@ -117,8 +146,25 @@ def normalize_image(
     Returns:
         True si se procesó correctamente, False en caso contrario.
     """
+    tmp_path = output_path.with_name(f"{output_path.stem}.{uuid.uuid4().hex}.tmp.jpg")
     try:
         with Image.open(input_path) as opened_img:
+            # Orientación según EXIF antes de recortar (fotos de móvil, etc.).
+            opened_img = ImageOps.exif_transpose(opened_img)
+
+            n_frames = getattr(opened_img, "n_frames", 1)
+            if n_frames > 1:
+                _eprint(
+                    f"  [AVISO] {input_path.name}: imagen multipágina ({n_frames}); "
+                    "solo se usa la primera página."
+                )
+
+            if _image_has_transparency(opened_img):
+                _eprint(
+                    f"  [AVISO] {input_path.name}: canal alpha / transparencia; "
+                    "al pasar a JPEG el fondo transparente se rellenará (típicamente negro)."
+                )
+
             # Convertir a RGB para estandarizar salida JPG y evitar problemas de alpha.
             if opened_img.mode != "RGB":
                 img_rgb = opened_img.convert("RGB")
@@ -127,29 +173,38 @@ def normalize_image(
 
             normalized = center_crop_resize(img_rgb, width, height)
 
-            if output_format == "JPEG":
-                normalized.save(
-                    output_path,
-                    format=output_format,
-                    quality=quality,
-                    optimize=True,
-                )
-            else:
-                normalized.save(
-                    output_path,
-                    format=output_format,
-                    quality=quality,
-                )
+            if output_format != "JPEG":
+                raise ValueError(f"Formato de salida no soportado: {output_format}")
+
+            normalized.save(
+                tmp_path,
+                format="JPEG",
+                quality=quality,
+                optimize=True,
+            )
+            tmp_path.replace(output_path)
             return True
 
     except (OSError, ValueError, MemoryError, DecompressionBombError) as e:
-        print(f"  [ERROR] {input_path.name}: {e}")
+        _eprint(f"  [ERROR] {input_path.name}: {e}")
         return False
+    except Exception as e:
+        # Red de seguridad: Pillow u otros fallos no previstos no deben abortar todo el lote sin resumen.
+        _eprint(f"  [ERROR] {input_path.name}: {e}")
+        return False
+    finally:
+        if tmp_path.exists():
+            try:
+                tmp_path.unlink()
+            except OSError:
+                pass
 
 
 def get_image_dimensions(image_path: Path) -> tuple[int, int] | None:
     """
-    Obtiene las dimensiones de una imagen sin cargarla completamente.
+    Obtiene (ancho, alto) tras aplicar la orientación EXIF, igual que en la normalización.
+
+    Así el umbral 1920×1080 y el dry-run coinciden con la geometría que verá `normalize_image`.
 
     Args:
         image_path: Ruta al archivo de imagen.
@@ -159,14 +214,20 @@ def get_image_dimensions(image_path: Path) -> tuple[int, int] | None:
     """
     try:
         with Image.open(image_path) as img:
-            return img.size
+            oriented = ImageOps.exif_transpose(img)
+            return oriented.size
     except (OSError, ValueError, MemoryError, DecompressionBombError):
+        return None
+    except Exception as e:
+        _eprint(f"  [AVISO] {image_path.name}: no se pudieron leer dimensiones ({e})")
         return None
 
 
 def is_eligible_for_slideshow(width: int, height: int, min_width: int, min_height: int) -> bool:
     """
-    Comprueba si las dimensiones son aptas para el slideshow (>= mínimo).
+    Comprueba si la imagen alcanza el mínimo en ambos ejes (ancho y alto).
+
+    No basta con que un solo lado sea grande: deben cumplirse los dos umbrales.
 
     Args:
         width: Ancho de la imagen.
@@ -175,7 +236,7 @@ def is_eligible_for_slideshow(width: int, height: int, min_width: int, min_heigh
         min_height: Alto mínimo requerido.
 
     Returns:
-        True si la imagen cumple o supera los mínimos.
+        True si ancho >= min_width y alto >= min_height.
     """
     return width >= min_width and height >= min_height
 
@@ -204,7 +265,16 @@ def get_unique_path(base_path: Path) -> Path:
 def main() -> None:
     """Punto de entrada principal del script."""
     parser = argparse.ArgumentParser(
-        description="Normaliza wallpapers: solo >= 1920x1080. Menores van a descartadas/."
+        description=(
+            "Normaliza wallpapers: exige ancho y alto >= valores dados (default 1920x1080). "
+            "Menores van a descartadas/."
+        ),
+        epilog=(
+            "Códigos de salida: 0 éxito (incluye carpeta sin imágenes elegibles); "
+            "1 hubo errores al procesar; 130 cancelado con Ctrl+C. "
+            "No ejecutar dos instancias a la vez sobre la misma carpeta."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
         "--width",
@@ -240,39 +310,67 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.width <= 0 or args.height <= 0:
-        print("Error: --width y --height deben ser mayores que 0.")
-        exit(1)
+        _eprint("Error: --width y --height deben ser mayores que 0.")
+        sys.exit(1)
     if args.quality < 1 or args.quality > 100:
-        print("Error: --quality debe estar entre 1 y 100.")
-        exit(1)
+        _eprint("Error: --quality debe estar entre 1 y 100.")
+        sys.exit(1)
+
+    if args.path is not None:
+        stripped_path = args.path.strip()
+        if not stripped_path:
+            _eprint("Error: --path no puede estar vacío ni ser solo espacios.")
+            sys.exit(1)
+        path_arg: Path | None = Path(stripped_path)
+    else:
+        path_arg = None
 
     try:
-        wallpapers_dir = (
-            Path(args.path).resolve()
-            if args.path
-            else get_installed_wallpapers_path()
-        )
+        wallpapers_dir = path_arg.resolve() if path_arg else get_installed_wallpapers_path()
     except RuntimeError as e:
-        print(f"Error: {e}")
-        exit(1)
+        _eprint(f"Error: {e}")
+        sys.exit(1)
     backup_dir = wallpapers_dir / BACKUP_SUBDIR
     discarded_dir = wallpapers_dir / DISCARDED_SUBDIR
 
     if not wallpapers_dir.exists():
-        print(f"Error: No existe {wallpapers_dir}")
-        if not args.path:
-            print("  Ejecuta primero install.ps1 o usa --path para otra carpeta.")
-        exit(1)
+        _eprint(f"Error: No existe {wallpapers_dir}")
+        if args.path is None:
+            _eprint("  Ejecuta primero install.ps1 o usa --path para otra carpeta.")
+        sys.exit(1)
 
-    # Solo archivos en la raíz de wallpapers (no en subcarpetas)
-    image_files = [
-        f for f in wallpapers_dir.iterdir()
-        if f.is_file() and f.suffix.lower() in SUPPORTED_INPUT_FORMATS
-    ]
+    if not wallpapers_dir.is_dir():
+        _eprint(f"Error: La ruta no es un directorio: {wallpapers_dir}")
+        sys.exit(1)
+
+    # Solo archivos en la raíz (no subcarpetas); se ignoran enlaces simbólicos por seguridad.
+    # Orden estable por nombre para resultados reproducibles si hay colisiones de nombre base.
+    image_files = sorted(
+        (
+            f
+            for f in wallpapers_dir.iterdir()
+            if f.is_file()
+            and not f.is_symlink()
+            and f.suffix.lower() in SUPPORTED_INPUT_FORMATS
+        ),
+        key=lambda p: p.name.casefold(),
+    )
 
     if not image_files:
-        print(f"No se encontraron imágenes en {wallpapers_dir}")
-        exit(0)
+        _eprint(f"No se encontraron imágenes en {wallpapers_dir} (salida 0: nada que hacer).")
+        sys.exit(0)
+
+    # Aviso si varios archivos comparten el mismo nombre base (p. ej. foo.png y foo.jpg): la salida sería un solo foo.jpg.
+    by_stem: defaultdict[str, list[Path]] = defaultdict(list)
+    for f in image_files:
+        by_stem[f.stem.casefold()].append(f)
+    for stem_key, files in sorted(by_stem.items(), key=lambda x: x[0]):
+        if len(files) > 1:
+            names = ", ".join(sorted(p.name for p in files))
+            _eprint(
+                f"  [AVISO] Mismo nombre base ({stem_key!r}) en varios archivos: {names}. "
+                "Renombrá o dejá solo uno para evitar colisiones al generar .jpg."
+            )
 
     print("=" * 55)
     print("  Normalizador de Wallpapers - NASA Theme")
@@ -294,7 +392,7 @@ def main() -> None:
             else:
                 status = f"DESCARTAR {dims[0]}x{dims[1]} -> {DISCARDED_SUBDIR}/"
             print(f"  - {f.name}: {status}")
-        exit(0)
+        sys.exit(0)
 
     # Crear carpetas backup y descartadas
     backup_dir.mkdir(parents=True, exist_ok=True)
@@ -304,47 +402,71 @@ def main() -> None:
     discarded_count = 0
     error_count = 0
 
-    for img_path in image_files:
-        try:
-            dims = get_image_dimensions(img_path)
-            if dims is None:
-                print(f"  [ERROR] {img_path.name}: no se pudo leer")
+    try:
+        for img_path in image_files:
+            try:
+                dims = get_image_dimensions(img_path)
+                if dims is None:
+                    _eprint(f"  [ERROR] {img_path.name}: no se pudo leer")
+                    error_count += 1
+                    continue
+
+                width, height = dims
+
+                if not is_eligible_for_slideshow(width, height, args.width, args.height):
+                    dest = get_unique_path(discarded_dir / img_path.name)
+                    shutil.move(str(img_path), str(dest))
+                    print(
+                        f"  [DESCARTADA] {img_path.name} ({width}x{height}) -> {DISCARDED_SUBDIR}/"
+                    )
+                    discarded_count += 1
+                    continue
+
+                backup_path = get_unique_path(backup_dir / img_path.name)
+                shutil.move(str(img_path), str(backup_path))
+                output_path = get_unique_path(wallpapers_dir / (img_path.stem + ".jpg"))
+
+                if normalize_image(
+                    backup_path,
+                    output_path,
+                    args.width,
+                    args.height,
+                    args.quality,
+                    DEFAULT_OUTPUT_FORMAT,
+                ):
+                    processed_count += 1
+                    print(f"  [OK] {img_path.name} ({width}x{height}) -> {output_path.name}")
+                else:
+                    if output_path.exists():
+                        try:
+                            output_path.unlink()
+                        except OSError:
+                            pass
+                    try:
+                        shutil.move(str(backup_path), str(img_path))
+                        error_count += 1
+                        _eprint(f"  [ERROR] {img_path.name}: fallo al procesar, restaurado")
+                    except OSError as move_err:
+                        error_count += 1
+                        _eprint(
+                            f"  [ERROR] {img_path.name}: fallo al procesar; original en "
+                            f"{BACKUP_SUBDIR}/{backup_path.name} ({move_err})"
+                        )
+            except OSError as e:
+                _eprint(f"  [ERROR] {img_path.name}: {e}")
                 error_count += 1
-                continue
+    except KeyboardInterrupt:
+        _eprint("\nInterrupción por el usuario (Ctrl+C). Revisa backup/ por archivos ya movidos.")
+        sys.exit(130)
 
-            width, height = dims
-
-            if not is_eligible_for_slideshow(width, height, args.width, args.height):
-                dest = get_unique_path(discarded_dir / img_path.name)
-                shutil.move(str(img_path), str(dest))
-                print(f"  [DESCARTADA] {img_path.name} ({width}x{height}) -> {DISCARDED_SUBDIR}/")
-                discarded_count += 1
-                continue
-
-            backup_path = get_unique_path(backup_dir / img_path.name)
-            shutil.move(str(img_path), str(backup_path))
-            output_path = get_unique_path(wallpapers_dir / (img_path.stem + ".jpg"))
-
-            if normalize_image(
-                backup_path,
-                output_path,
-                args.width,
-                args.height,
-                args.quality,
-                DEFAULT_OUTPUT_FORMAT,
-            ):
-                processed_count += 1
-                print(f"  [OK] {img_path.name} ({width}x{height}) -> {output_path.name}")
-            else:
-                shutil.move(str(backup_path), str(img_path))
-                error_count += 1
-                print(f"  [ERROR] {img_path.name}: fallo al procesar, restaurado")
-        except (OSError, FileNotFoundError) as e:
-            print(f"  [ERROR] {img_path.name}: {e}")
-            error_count += 1
     print("\n" + "=" * 55)
-    print(f"  Procesadas: {processed_count} | Descartadas: {discarded_count} | Errores: {error_count}")
+    print(
+        f"  Procesadas: {processed_count} | Descartadas: {discarded_count} | Errores: {error_count}"
+    )
     print("=" * 55)
+
+    if error_count > 0:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

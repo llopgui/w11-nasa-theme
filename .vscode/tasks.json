@@ -5,14 +5,14 @@
       "label": "Instalar tema (dark)",
       "type": "shell",
       "command": "powershell",
-      "args": ["-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/install.ps1", "-Theme", "dark", "-NoRestart"],
+      "args": ["-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/install.ps1", "-Theme", "dark"],
       "group": "build",
       "presentation": { "reveal": "always" }
     },
     {
       "label": "Normalizar wallpapers (dry-run)",
-      "type": "shell",
-      "command": "python",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
       "args": ["${workspaceFolder}/scripts/normalize-wallpapers.py", "--dry-run"],
       "group": "build",
       "presentation": { "reveal": "always" }
