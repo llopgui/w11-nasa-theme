@@ -81,9 +81,7 @@ def get_installed_wallpapers_path() -> Path:
     """
     local_app_data = os.environ.get("LOCALAPPDATA", "")
     if not local_app_data:
-        raise RuntimeError(
-            "LOCALAPPDATA no está definido. Usa --path para especificar la carpeta."
-        )
+        raise RuntimeError("LOCALAPPDATA no está definido. Usa --path para especificar la carpeta.")
     return Path(local_app_data) / "Microsoft" / "Windows" / "Themes" / "NASA_Desktop"
 
 
@@ -149,27 +147,21 @@ def normalize_image(
     tmp_path = output_path.with_name(f"{output_path.stem}.{uuid.uuid4().hex}.tmp.jpg")
     try:
         with Image.open(input_path) as opened_img:
-            # Orientación según EXIF antes de recortar (fotos de móvil, etc.).
-            opened_img = ImageOps.exif_transpose(opened_img)
+            # Mantener el valor en una variable nueva evita conflicto de tipado (ImageFile -> Image).
+            oriented_img = ImageOps.exif_transpose(opened_img)
 
-            n_frames = getattr(opened_img, "n_frames", 1)
+            n_frames = getattr(oriented_img, "n_frames", 1)
             if n_frames > 1:
-                _eprint(
-                    f"  [AVISO] {input_path.name}: imagen multipágina ({n_frames}); "
-                    "solo se usa la primera página."
-                )
+                _eprint(f"  [AVISO] {input_path.name}: imagen multipágina ({n_frames}); solo se usa la primera página.")
 
-            if _image_has_transparency(opened_img):
-                _eprint(
-                    f"  [AVISO] {input_path.name}: canal alpha / transparencia; "
-                    "al pasar a JPEG el fondo transparente se rellenará (típicamente negro)."
-                )
+            if _image_has_transparency(oriented_img):
+                _eprint(f"  [AVISO] {input_path.name}: canal alpha / transparencia; al pasar a JPEG el fondo transparente se rellenará (típicamente negro).")
 
             # Convertir a RGB para estandarizar salida JPG y evitar problemas de alpha.
-            if opened_img.mode != "RGB":
-                img_rgb = opened_img.convert("RGB")
+            if oriented_img.mode != "RGB":
+                img_rgb = oriented_img.convert("RGB")
             else:
-                img_rgb = opened_img.copy()
+                img_rgb = oriented_img.copy()
 
             normalized = center_crop_resize(img_rgb, width, height)
 
@@ -188,8 +180,8 @@ def normalize_image(
     except (OSError, ValueError, MemoryError, DecompressionBombError) as e:
         _eprint(f"  [ERROR] {input_path.name}: {e}")
         return False
-    except Exception as e:
-        # Red de seguridad: Pillow u otros fallos no previstos no deben abortar todo el lote sin resumen.
+    except (RuntimeError, TypeError, AttributeError, KeyError) as e:
+        # Red de seguridad acotada para errores no operativos de Pillow o metadatos EXIF.
         _eprint(f"  [ERROR] {input_path.name}: {e}")
         return False
     finally:
@@ -218,7 +210,7 @@ def get_image_dimensions(image_path: Path) -> tuple[int, int] | None:
             return oriented.size
     except (OSError, ValueError, MemoryError, DecompressionBombError):
         return None
-    except Exception as e:
+    except (RuntimeError, TypeError, AttributeError, KeyError) as e:
         _eprint(f"  [AVISO] {image_path.name}: no se pudieron leer dimensiones ({e})")
         return None
 
@@ -265,10 +257,7 @@ def get_unique_path(base_path: Path) -> Path:
 def main() -> None:
     """Punto de entrada principal del script."""
     parser = argparse.ArgumentParser(
-        description=(
-            "Normaliza wallpapers: exige ancho y alto >= valores dados (default 1920x1080). "
-            "Menores van a descartadas/."
-        ),
+        description=("Normaliza wallpapers: exige ancho y alto >= valores dados (default 1920x1080). Menores van a descartadas/."),
         epilog=(
             "Códigos de salida: 0 éxito (incluye carpeta sin imágenes elegibles); "
             "1 hubo errores al procesar; 130 cancelado con Ctrl+C. "
@@ -346,13 +335,7 @@ def main() -> None:
     # Solo archivos en la raíz (no subcarpetas); se ignoran enlaces simbólicos por seguridad.
     # Orden estable por nombre para resultados reproducibles si hay colisiones de nombre base.
     image_files = sorted(
-        (
-            f
-            for f in wallpapers_dir.iterdir()
-            if f.is_file()
-            and not f.is_symlink()
-            and f.suffix.lower() in SUPPORTED_INPUT_FORMATS
-        ),
+        (f for f in wallpapers_dir.iterdir() if f.is_file() and not f.is_symlink() and f.suffix.lower() in SUPPORTED_INPUT_FORMATS),
         key=lambda p: p.name.casefold(),
     )
 
@@ -367,10 +350,7 @@ def main() -> None:
     for stem_key, files in sorted(by_stem.items(), key=lambda x: x[0]):
         if len(files) > 1:
             names = ", ".join(sorted(p.name for p in files))
-            _eprint(
-                f"  [AVISO] Mismo nombre base ({stem_key!r}) en varios archivos: {names}. "
-                "Renombrá o dejá solo uno para evitar colisiones al generar .jpg."
-            )
+            _eprint(f"  [AVISO] Mismo nombre base ({stem_key!r}) en varios archivos: {names}. Renombrá o dejá solo uno para evitar colisiones al generar .jpg.")
 
     print("=" * 55)
     print("  Normalizador de Wallpapers - NASA Theme")
@@ -416,9 +396,7 @@ def main() -> None:
                 if not is_eligible_for_slideshow(width, height, args.width, args.height):
                     dest = get_unique_path(discarded_dir / img_path.name)
                     shutil.move(str(img_path), str(dest))
-                    print(
-                        f"  [DESCARTADA] {img_path.name} ({width}x{height}) -> {DISCARDED_SUBDIR}/"
-                    )
+                    print(f"  [DESCARTADA] {img_path.name} ({width}x{height}) -> {DISCARDED_SUBDIR}/")
                     discarded_count += 1
                     continue
 
@@ -448,10 +426,7 @@ def main() -> None:
                         _eprint(f"  [ERROR] {img_path.name}: fallo al procesar, restaurado")
                     except OSError as move_err:
                         error_count += 1
-                        _eprint(
-                            f"  [ERROR] {img_path.name}: fallo al procesar; original en "
-                            f"{BACKUP_SUBDIR}/{backup_path.name} ({move_err})"
-                        )
+                        _eprint(f"  [ERROR] {img_path.name}: fallo al procesar; original en {BACKUP_SUBDIR}/{backup_path.name} ({move_err})")
             except OSError as e:
                 _eprint(f"  [ERROR] {img_path.name}: {e}")
                 error_count += 1
@@ -460,9 +435,7 @@ def main() -> None:
         sys.exit(130)
 
     print("\n" + "=" * 55)
-    print(
-        f"  Procesadas: {processed_count} | Descartadas: {discarded_count} | Errores: {error_count}"
-    )
+    print(f"  Procesadas: {processed_count} | Descartadas: {discarded_count} | Errores: {error_count}")
     print("=" * 55)
 
     if error_count > 0:

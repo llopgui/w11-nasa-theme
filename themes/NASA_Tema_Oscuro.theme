@@ -24,43 +24,44 @@ Shuffle=1
 ImagesRootPath=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop
 
 [Control Panel\Colors]
-; Paleta NASA - Tema Oscuro Profundo (matices espaciales preservados)
-; Background: espacio profundo (#030d24)
-Background=3 13 36
-; Ventanas: negro suave (#121212)
-Window=18 18 18
-WindowText=240 240 240
+; Paleta NASA - Tema Oscuro tokenizada (consistencia con referencia visual)
+; Background: primary-darkest (#061f4a)
+Background=6 31 74
+; Ventanas: base oscuro (#212121)
+Window=33 33 33
+WindowText=241 241 241
 ; Barra de título activa: azul NASA (#0b3d91)
 ActiveTitle=11 61 145
 TitleText=255 255 255
 Hilight=16 91 216
 HilightText=255 255 255
-; Barra de título inactiva: gris muy oscuro
-InactiveTitle=28 32 40
-InactiveTitleText=160 162 168
-; Botones y controles: gris oscuro (#252a33)
-ButtonFace=37 42 51
-ButtonText=240 240 240
-ButtonShadow=3 13 36
+; Barra de título inactiva: gris NASA oscuro (#323a45)
+InactiveTitle=50 58 69
+InactiveTitleText=174 176 181
+; Botones y controles: gris NASA oscuro (#323a45)
+ButtonFace=50 58 69
+ButtonText=241 241 241
+ButtonShadow=6 31 74
 ButtonHilight=2 191 231
-ButtonDkShadow=3 13 36
-ButtonLight=45 65 95
+ButtonDkShadow=6 31 74
+ButtonLight=91 97 107
 ; Menús: igual que ventanas
-Menu=18 18 18
-MenuText=240 240 240
+Menu=33 33 33
+MenuText=241 241 241
 ; Barras de desplazamiento
-Scrollbar=37 42 51
+Scrollbar=50 58 69
 ; Bordes: acento azul NASA
 WindowFrame=16 91 216
 ActiveBorder=16 91 216
-InactiveBorder=37 42 51
+InactiveBorder=50 58 69
 ; Otros elementos
-AppWorkspace=3 13 36
-GrayText=120 122 128
-InfoWindow=18 18 18
-InfoText=240 240 240
+AppWorkspace=6 31 74
+; Texto secundario: se mantiene por encima de contraste funcional en oscuro.
+GrayText=174 176 181
+InfoWindow=33 33 33
+InfoText=241 241 241
 GradientActiveTitle=11 61 145
-GradientInactiveTitle=28 32 40
+GradientInactiveTitle=50 58 69
 
 [Control Panel\Cursors]
 ; Cursores personalizados desde cursors\ (si existen)

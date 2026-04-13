@@ -33,11 +33,18 @@ cd w11-nasa-theme
 # O tema claro
 .\install.ps1 -Theme light
 
+# Modo de acento fijo NASA (consistencia de marca)
+.\install.ps1 -Theme dark -AccentMode fixed
+
+# Modo de acento automático (dinámico por wallpaper)
+.\install.ps1 -Theme dark -AccentMode auto
+
 # Opcional: reinicio completo de Explorer (cierra todas las ventanas del Explorador de archivos)
 .\install.ps1 -Theme dark -RestartExplorer
 ```
 
 Por defecto **no** se reinicia Explorer; los cambios suelen verse al cambiar de ventana. Usá `-RestartExplorer` solo si necesitás forzar el reinicio.
+Por defecto, el instalador usa `-AccentMode auto` (acento dinámico). Si priorizás coherencia visual NASA, usá `-AccentMode fixed`.
 
 ## Estructura del proyecto
 
@@ -80,8 +87,22 @@ w11-nasa-theme/
 | Qué querés hacer | Cómo |
 |------------------|------|
 | Instalar o actualizar el tema | `.\install.ps1 -Theme dark` o `-Theme light` |
+| Elegir acento automático o fijo NASA | `.\install.ps1 -Theme dark -AccentMode auto|fixed` |
 | Igualar tamaño/formato de wallpapers nuevos | Ver [README de wallpapers](assets/wallpapers/README.md) (`normalize-wallpapers.py` o el `.exe` opcional) |
+| Validar contraste de colores del tema | `python .\scripts\validate-theme-contrast.py` |
 | Generar `NASA-Normalize-Wallpapers.exe` | `.\scripts\build-normalize-exe.ps1` (salida en `dist/`) |
+
+## Criterio de contraste y paleta
+
+- **Texto principal vs fondo**: mínimo `4.5:1`.
+- **Texto secundario vs fondo de superficie**: mínimo `4.5:1`.
+- **Referencia de paleta**: NASA Web Design System (ver créditos).
+
+Podés comprobar cumplimiento automáticamente con:
+
+```powershell
+python .\scripts\validate-theme-contrast.py
+```
 
 ## Personalización
 

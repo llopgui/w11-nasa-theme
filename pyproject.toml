@@ -21,3 +21,11 @@ ignore = ["E501"]
 
 [tool.ruff.format]
 quote-style = "double"
+
+[tool.pylint.format]
+# Alineado con Ruff para evitar reglas contradictorias.
+max-line-length = 180
+
+[tool.pylint.basic]
+# Se permite guion para scripts ejecutables tipo normalize-wallpapers.py.
+module-rgx = "([a-z_][a-z0-9_-]*)$"

@@ -9,6 +9,9 @@
 .PARAMETER Theme
     "dark" para tema oscuro, "light" para tema claro.
 
+.PARAMETER AccentMode
+    "auto" para acento dinámico según wallpaper, "fixed" para acento fijo NASA (#105bd8).
+
 .PARAMETER RestartExplorer
     Reinicia el proceso Explorer (cierra todas las ventanas del Explorador; puede interrumpir
     trabajo en curso). Por defecto no se reinicia; los cambios suelen aplicarse al cambiar de ventana.
@@ -16,6 +19,7 @@
 .EXAMPLE
     .\install.ps1 -Theme dark
     .\install.ps1 -Theme light
+    .\install.ps1 -Theme dark -AccentMode fixed
     .\install.ps1 -Theme dark -RestartExplorer
 #>
 
@@ -23,6 +27,9 @@ param(
     [Parameter(Mandatory=$false)]
     [ValidateSet("dark", "light")]
     [string]$Theme = "dark",
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("auto", "fixed")]
+    [string]$AccentMode = "auto",
     [Parameter(Mandatory=$false)]
     [switch]$RestartExplorer
 )
@@ -200,29 +207,46 @@ try {
     Write-Host "      ADVERTENCIA: No se pudo cambiar el modo." -ForegroundColor Yellow
 }
 
-# 4b. Color de énfasis en automático
-$accentOk = $false
-try {
-    Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoColorization" -Value 1 -Type DWord -Force -ErrorAction Stop
-    $accentOk = $true
-} catch {
-    Write-Host "      (AutoColorization: $($_.Exception.Message))" -ForegroundColor DarkGray
-}
-if (-not $accentOk) {
+# 4b. Color de énfasis configurable (auto o fijo NASA)
+if ($AccentMode -eq "fixed") {
+    $accentOk = $false
     try {
-        $AccentPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Accent"
-        if (-not (Test-Path $AccentPath)) { New-Item -Path $AccentPath -Force | Out-Null }
-        Set-ItemProperty -Path $AccentPath -Name "AccentColorSet" -Value 0 -Type DWord -Force -ErrorAction Stop
+        Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoColorization" -Value 0 -Type DWord -Force -ErrorAction Stop
         $accentOk = $true
     } catch {
-        Write-Host "      (AccentColorSet: $($_.Exception.Message))" -ForegroundColor DarkGray
+        Write-Host "      (AutoColorization: $($_.Exception.Message))" -ForegroundColor DarkGray
     }
-}
-if ($accentOk) {
-    Write-Host "      Color de énfasis: automático (del wallpaper)" -ForegroundColor Gray
-    Write-Host "      [OK] Color de énfasis configurado" -ForegroundColor Green
+
+    if ($accentOk) {
+        Write-Host "      Color de énfasis: fijo NASA (#105bd8)" -ForegroundColor Gray
+        Write-Host "      [OK] Color de énfasis configurado" -ForegroundColor Green
+    } else {
+        Write-Host "      ADVERTENCIA: No se pudo fijar el color de énfasis." -ForegroundColor Yellow
+    }
 } else {
-    Write-Host "      ADVERTENCIA: No se pudo activar color automático." -ForegroundColor Yellow
+    $accentOk = $false
+    try {
+        Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoColorization" -Value 1 -Type DWord -Force -ErrorAction Stop
+        $accentOk = $true
+    } catch {
+        Write-Host "      (AutoColorization: $($_.Exception.Message))" -ForegroundColor DarkGray
+    }
+    if (-not $accentOk) {
+        try {
+            $AccentPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Accent"
+            if (-not (Test-Path $AccentPath)) { New-Item -Path $AccentPath -Force | Out-Null }
+            Set-ItemProperty -Path $AccentPath -Name "AccentColorSet" -Value 0 -Type DWord -Force -ErrorAction Stop
+            $accentOk = $true
+        } catch {
+            Write-Host "      (AccentColorSet: $($_.Exception.Message))" -ForegroundColor DarkGray
+        }
+    }
+    if ($accentOk) {
+        Write-Host "      Color de énfasis: automático (del wallpaper)" -ForegroundColor Gray
+        Write-Host "      [OK] Color de énfasis configurado" -ForegroundColor Green
+    } else {
+        Write-Host "      ADVERTENCIA: No se pudo activar color automático." -ForegroundColor Yellow
+    }
 }
 
 # 5. Reiniciar Explorer (opt-in: cierra todas las ventanas del Explorador de archivos)
@@ -242,6 +266,11 @@ Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Resumen:" -ForegroundColor Cyan
 Write-Host "  - Tema: NASA Space ($Theme)" -ForegroundColor White
+if ($AccentMode -eq "fixed") {
+    Write-Host "  - Color de énfasis: fijo NASA (#105bd8)" -ForegroundColor White
+} else {
+    Write-Host "  - Color de énfasis: automático (del wallpaper)" -ForegroundColor White
+}
 Write-Host "  - Configuración > Personalización > Temas" -ForegroundColor White
 if ($wallpaperCount -gt 0) {
     Write-Host "  - Wallpapers: $wallpaperCount imágenes (slideshow cada 10 min)" -ForegroundColor White

@@ -34,13 +34,13 @@ ActiveTitle=16 91 216
 TitleText=255 255 255
 Hilight=16 91 216
 HilightText=255 255 255
-; Barra de título inactiva
-InactiveTitle=220 228 239
+; Barra de título inactiva: neutral NASA (#d6d7d9)
+InactiveTitle=214 215 217
 InactiveTitleText=33 33 33
 ; Botones y controles
 ButtonFace=241 241 241
 ButtonText=33 33 33
-ButtonShadow=214 208 200
+ButtonShadow=214 215 217
 ButtonHilight=2 191 231
 ButtonDkShadow=91 97 107
 ButtonLight=255 255 255
@@ -48,18 +48,19 @@ ButtonLight=255 255 255
 Menu=255 255 255
 MenuText=33 33 33
 ; Barras de desplazamiento
-Scrollbar=214 208 200
+Scrollbar=214 215 217
 ; Bordes
 WindowFrame=16 91 216
 ActiveBorder=16 91 216
-InactiveBorder=214 208 200
+InactiveBorder=214 215 217
 ; Otros elementos
 AppWorkspace=220 228 239
-GrayText=174 176 181
+; Texto secundario con contraste funcional sobre superficies claras.
+GrayText=91 97 107
 InfoWindow=255 255 255
 InfoText=33 33 33
 GradientActiveTitle=16 91 216
-GradientInactiveTitle=220 228 239
+GradientInactiveTitle=214 215 217
 
 [Control Panel\Cursors]
 ; Cursores personalizados desde cursors\ (si existen)
