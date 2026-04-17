@@ -16,6 +16,10 @@
     Reinicia el proceso Explorer (cierra todas las ventanas del Explorador; puede interrumpir
     trabajo en curso). Por defecto no se reinicia; los cambios suelen aplicarse al cambiar de ventana.
 
+.PARAMETER ThemeApplyTimeoutSeconds
+    Tiempo máximo (en segundos) para esperar que Windows confirme CurrentTheme tras abrir el .theme.
+    Incrementa este valor en equipos lentos para evitar falsos fallos.
+
 .EXAMPLE
     .\install.ps1 -Theme dark
     .\install.ps1 -Theme light
@@ -30,6 +34,9 @@ param(
     [Parameter(Mandatory=$false)]
     [ValidateSet("auto", "fixed")]
     [string]$AccentMode = "auto",
+    [Parameter(Mandatory=$false)]
+    [ValidateRange(5, 120)]
+    [int]$ThemeApplyTimeoutSeconds = 30,
     [Parameter(Mandatory=$false)]
     [switch]$RestartExplorer
 )
@@ -73,13 +80,19 @@ if (Test-Path -LiteralPath $NASA_DesktopPath) {
 
 $imageExtensions = @("*.jpg", "*.jpeg", "*.png", "*.bmp", "*.tif", "*.tiff", "*.webp")
 $wallpaperCount = 0
+$wallpaperCopyErrors = 0
 
-if (Test-Path $WallpapersSourcePath) {
+if (Test-Path -LiteralPath $WallpapersSourcePath) {
     foreach ($ext in $imageExtensions) {
-        Get-ChildItem -Path $WallpapersSourcePath -Filter $ext -File -ErrorAction SilentlyContinue | ForEach-Object {
-            Copy-Item $_.FullName $NASA_DesktopPath -Force
-            Write-Host "      Copiado: $($_.Name)" -ForegroundColor Gray
-            $wallpaperCount++
+        Get-ChildItem -LiteralPath $WallpapersSourcePath -Filter $ext -File -ErrorAction SilentlyContinue | ForEach-Object {
+            try {
+                Copy-Item -LiteralPath $_.FullName -Destination $NASA_DesktopPath -Force -ErrorAction Stop
+                Write-Host "      Copiado: $($_.Name)" -ForegroundColor Gray
+                $wallpaperCount++
+            } catch {
+                $wallpaperCopyErrors++
+                Write-Host "      ADVERTENCIA: No se pudo copiar $($_.Name): $($_.Exception.Message)" -ForegroundColor Yellow
+            }
         }
     }
 }
@@ -89,6 +102,9 @@ if ($wallpaperCount -eq 0) {
     Write-Host "      Coloca imágenes (jpg, png, bmp, webp, etc.) en esa carpeta." -ForegroundColor White
 } else {
     Write-Host "      [OK] $wallpaperCount wallpapers instalados" -ForegroundColor Green
+}
+if ($wallpaperCopyErrors -gt 0) {
+    Write-Host "      ADVERTENCIA: $wallpaperCopyErrors wallpaper(s) no se pudieron copiar." -ForegroundColor Yellow
 }
 
 # Acceso directo en el escritorio hacia la carpeta de wallpapers
@@ -117,18 +133,49 @@ Write-Host "[2/5] Cursores..." -ForegroundColor Cyan
 $CursorPackPath = Join-Path $CursorsSourcePath "w11-tail-cursor-concept-free\cursor"
 $CursorThemePath = if ($Theme -eq "dark") { Join-Path $CursorPackPath "dark" } else { Join-Path $CursorPackPath "light" }
 $cursorCount = 0
-if (Test-Path $CursorThemePath) {
-    if (-not (Test-Path $CursorsDestPath)) {
+$cursorCopyErrors = 0
+$cursorSetComplete = $false
+$missingCursorThemeFiles = @()
+# Nombres requeridos por los .theme para evitar falsos OK con packs parciales.
+$requiredCursorThemeFiles = @(
+    "arrow.cur",
+    "help.cur",
+    "hand.cur",
+    "appstarting.ani",
+    "wait.ani",
+    "nwpen.cur",
+    "no.cur",
+    "sizens.cur",
+    "sizewe.cur",
+    "crosshair.cur",
+    "ibeam.cur",
+    "sizenwse.cur",
+    "sizenesw.cur",
+    "sizeall.cur",
+    "uparrow.cur",
+    "person.cur",
+    "pin.cur"
+)
+if (Test-Path -LiteralPath $CursorThemePath) {
+    if (-not (Test-Path -LiteralPath $CursorsDestPath)) {
         New-Item -ItemType Directory -Path $CursorsDestPath -Force | Out-Null
     }
-    Get-ChildItem -Path $CursorThemePath -File -ErrorAction SilentlyContinue |
-        Where-Object { $_.Extension.ToLowerInvariant() -in '.cur', '.ani' } |
-        ForEach-Object {
-            Copy-Item $_.FullName $CursorsDestPath -Force
-            Write-Host "      Copiado: $($_.Name)" -ForegroundColor Gray
-            $cursorCount++
+    $cursorFiles = Get-ChildItem -LiteralPath $CursorThemePath -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.Extension.ToLowerInvariant() -in '.cur', '.ani' }
+    $cursorFileNames = @($cursorFiles | ForEach-Object { $_.Name.ToLowerInvariant() })
+    $missingCursorThemeFiles = @($requiredCursorThemeFiles | Where-Object { $_ -notin $cursorFileNames })
+    $cursorFiles | ForEach-Object {
+            try {
+                Copy-Item -LiteralPath $_.FullName -Destination $CursorsDestPath -Force -ErrorAction Stop
+                Write-Host "      Copiado: $($_.Name)" -ForegroundColor Gray
+                $cursorCount++
+            } catch {
+                $cursorCopyErrors++
+                Write-Host "      ADVERTENCIA: No se pudo copiar $($_.Name): $($_.Exception.Message)" -ForegroundColor Yellow
+            }
         }
-    if ($cursorCount -gt 0) {
+    if ($cursorCount -gt 0 -and $missingCursorThemeFiles.Count -eq 0) {
+        $cursorSetComplete = $true
         Write-Host "      [OK] $cursorCount cursores instalados" -ForegroundColor Green
         Write-Host ""
         Write-Host "      --- Atribución (requerida por licencia) ---" -ForegroundColor Yellow
@@ -136,31 +183,45 @@ if (Test-Path $CursorThemePath) {
         Write-Host "      Autor: Jepri Creations" -ForegroundColor White
         Write-Host "      DeviantArt: https://www.deviantart.com/jepricreations" -ForegroundColor Cyan
         Write-Host "      -------------------------------------------" -ForegroundColor Yellow
+    } elseif ($cursorCount -gt 0) {
+        Write-Host "      ADVERTENCIA: Se copiaron $cursorCount cursores, pero faltan archivos requeridos por el .theme: $($missingCursorThemeFiles -join ', ')." -ForegroundColor Yellow
     } else {
         Write-Host "      ADVERTENCIA: La carpeta del pack no contiene .cur/.ani copiables. El .theme puede referir cursores que no existan (instala el pack completo o ignora entradas rotas en Temas)." -ForegroundColor Yellow
     }
 } else {
     Write-Host "      Pack de cursores no encontrado en assets\cursors\w11-tail-cursor-concept-free\" -ForegroundColor Yellow
 }
+if ($cursorCopyErrors -gt 0) {
+    Write-Host "      ADVERTENCIA: $cursorCopyErrors cursor(es) no se pudieron copiar." -ForegroundColor Yellow
+}
 Write-Host ""
 
 # 1c. Copiar sonidos (opcional)
 Write-Host "[3/5] Sonidos..." -ForegroundColor Cyan
 $soundCount = 0
-if (Test-Path $SoundsSourcePath) {
-    if (-not (Test-Path $SoundsDestPath)) {
+$soundCopyErrors = 0
+if (Test-Path -LiteralPath $SoundsSourcePath) {
+    if (-not (Test-Path -LiteralPath $SoundsDestPath)) {
         New-Item -ItemType Directory -Path $SoundsDestPath -Force | Out-Null
     }
-    Get-ChildItem -Path $SoundsSourcePath -Filter "*.wav" -File -ErrorAction SilentlyContinue | ForEach-Object {
-        Copy-Item $_.FullName $SoundsDestPath -Force
-        Write-Host "      Copiado: $($_.Name)" -ForegroundColor Gray
-        $soundCount++
+    Get-ChildItem -LiteralPath $SoundsSourcePath -Filter "*.wav" -File -ErrorAction SilentlyContinue | ForEach-Object {
+        try {
+            Copy-Item -LiteralPath $_.FullName -Destination $SoundsDestPath -Force -ErrorAction Stop
+            Write-Host "      Copiado: $($_.Name)" -ForegroundColor Gray
+            $soundCount++
+        } catch {
+            $soundCopyErrors++
+            Write-Host "      ADVERTENCIA: No se pudo copiar $($_.Name): $($_.Exception.Message)" -ForegroundColor Yellow
+        }
     }
 }
 if ($soundCount -gt 0) {
     Write-Host "      [OK] $soundCount sonidos instalados" -ForegroundColor Green
 } else {
     Write-Host "      Ningún sonido en assets\sounds\ (opcional)" -ForegroundColor Gray
+}
+if ($soundCopyErrors -gt 0) {
+    Write-Host "      ADVERTENCIA: $soundCopyErrors sonido(s) no se pudieron copiar." -ForegroundColor Yellow
 }
 Write-Host ""
 
@@ -170,11 +231,16 @@ $themeFile = if ($Theme -eq "dark") { "NASA_Tema_Oscuro.theme" } else { "NASA_Te
 $themeSource = Join-Path $ThemesSourcePath $themeFile
 $themeDest = Join-Path $ThemesPath $themeFile
 
-if (-not (Test-Path $themeSource)) {
+if (-not (Test-Path -LiteralPath $themeSource)) {
     Write-Host "      Error: No se encuentra $themeFile en themes\" -ForegroundColor Red
     exit 1
 }
-Copy-Item $themeSource $themeDest -Force
+try {
+    Copy-Item -LiteralPath $themeSource -Destination $themeDest -Force -ErrorAction Stop
+} catch {
+    Write-Host "      Error: No se pudo copiar ${themeFile}: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
+}
 Write-Host "      Copiado: $themeFile" -ForegroundColor Gray
 Write-Host "      [OK] Tema listo" -ForegroundColor Green
 Write-Host ""
@@ -182,13 +248,53 @@ Write-Host ""
 # 3. Aplicar tema PRIMERO (puede resetear el modo de color)
 Write-Host "[5/5] Configuración del sistema..." -ForegroundColor Cyan
 Write-Host "      Aplicando tema NASA ($Theme)..." -ForegroundColor Gray
+$criticalFailures = [System.Collections.Generic.List[string]]::new()
+$themeApplied = $false
 try {
     Start-Process -FilePath $themeDest -ErrorAction Stop | Out-Null
+
+    # Espera activa para evitar condición de carrera: continúa solo cuando Windows confirma el tema.
+    $themeStatePath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes"
+    # Timeout configurable para tolerar equipos lentos sin bloquear indefinidamente.
+    $themeApplyDeadline = (Get-Date).AddSeconds($ThemeApplyTimeoutSeconds)
+    do {
+        $currentTheme = $null
+        try {
+            $currentTheme = (Get-ItemProperty -LiteralPath $themeStatePath -Name "CurrentTheme" -ErrorAction Stop).CurrentTheme
+        } catch {
+            $currentTheme = $null
+        }
+
+        if ($currentTheme -and $currentTheme.EndsWith($themeFile, [System.StringComparison]::OrdinalIgnoreCase)) {
+            $themeApplied = $true
+            break
+        }
+
+        Start-Sleep -Milliseconds 250
+    } while ((Get-Date) -lt $themeApplyDeadline)
+
+    if (-not $themeApplied) {
+        throw "Windows no confirmó la aplicación de $themeFile dentro de ${ThemeApplyTimeoutSeconds}s."
+    }
 } catch {
-    Write-Host "      ADVERTENCIA: No se pudo abrir el archivo del tema automáticamente. Ábrelo manualmente desde Configuración > Personalización > Temas." -ForegroundColor Yellow
+    $criticalFailures.Add("No se pudo aplicar el tema automáticamente: $($_.Exception.Message)")
+    Write-Host "      ERROR: No se pudo abrir/aplicar el tema automáticamente. Ábrelo manualmente desde Configuración > Personalización > Temas." -ForegroundColor Red
 }
-# Espera heurística antes de tocar el registro; en equipos lentos puede hacer falta más tiempo
-Start-Sleep -Seconds 2
+
+# Fail-fast: si el tema no se aplicó, no continuar con cambios de registro (modo/acento).
+if (-not $themeApplied) {
+    Write-Host ""
+    Write-Host "========================================" -ForegroundColor Red
+    Write-Host "  Instalación incompleta" -ForegroundColor Red
+    Write-Host "========================================" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Errores críticos:" -ForegroundColor Red
+    foreach ($failure in $criticalFailures) {
+        Write-Host "  - $failure" -ForegroundColor Red
+    }
+    Write-Host ""
+    exit 1
+}
 
 # 4. Activar modo oscuro/claro DESPUES del tema
 $PersonalizePath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
@@ -204,7 +310,8 @@ try {
     Write-Host "      Modo: $modoTexto (Windows + Apps)" -ForegroundColor Gray
     Write-Host "      [OK] Modo del sistema configurado" -ForegroundColor Green
 } catch {
-    Write-Host "      ADVERTENCIA: No se pudo cambiar el modo." -ForegroundColor Yellow
+    $criticalFailures.Add("No se pudo configurar el modo del sistema: $($_.Exception.Message)")
+    Write-Host "      ERROR: No se pudo cambiar el modo del sistema." -ForegroundColor Red
 }
 
 # 4b. Color de énfasis configurable (auto o fijo NASA)
@@ -221,7 +328,8 @@ if ($AccentMode -eq "fixed") {
         Write-Host "      Color de énfasis: fijo NASA (#105bd8)" -ForegroundColor Gray
         Write-Host "      [OK] Color de énfasis configurado" -ForegroundColor Green
     } else {
-        Write-Host "      ADVERTENCIA: No se pudo fijar el color de énfasis." -ForegroundColor Yellow
+        $criticalFailures.Add("No se pudo fijar el color de énfasis NASA.")
+        Write-Host "      ERROR: No se pudo fijar el color de énfasis." -ForegroundColor Red
     }
 } else {
     $accentOk = $false
@@ -245,7 +353,8 @@ if ($AccentMode -eq "fixed") {
         Write-Host "      Color de énfasis: automático (del wallpaper)" -ForegroundColor Gray
         Write-Host "      [OK] Color de énfasis configurado" -ForegroundColor Green
     } else {
-        Write-Host "      ADVERTENCIA: No se pudo activar color automático." -ForegroundColor Yellow
+        $criticalFailures.Add("No se pudo activar el color de énfasis automático.")
+        Write-Host "      ERROR: No se pudo activar color automático." -ForegroundColor Red
     }
 }
 
@@ -260,6 +369,18 @@ if ($RestartExplorer) {
 }
 
 Write-Host ""
+if ($criticalFailures.Count -gt 0) {
+    Write-Host "========================================" -ForegroundColor Red
+    Write-Host "  Instalación incompleta" -ForegroundColor Red
+    Write-Host "========================================" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Errores críticos:" -ForegroundColor Red
+    foreach ($failure in $criticalFailures) {
+        Write-Host "  - $failure" -ForegroundColor Red
+    }
+    Write-Host ""
+    exit 1
+}
 Write-Host "========================================" -ForegroundColor Green
 Write-Host "  Instalación completada!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
@@ -276,7 +397,7 @@ if ($wallpaperCount -gt 0) {
     Write-Host "  - Wallpapers: $wallpaperCount imágenes (slideshow cada 10 min)" -ForegroundColor White
 }
 Write-Host "  - Acceso directo en escritorio: NASA Wallpapers (añade ahí nuevas imágenes)" -ForegroundColor White
-if ($cursorCount -gt 0) {
+if ($cursorSetComplete) {
     Write-Host "  - Cursores: W11 Tail Cursor por Jepri Creations" -ForegroundColor White
     Write-Host "    https://www.deviantart.com/jepricreations" -ForegroundColor Cyan
 }

@@ -23,6 +23,7 @@ import shutil
 import sys
 import uuid
 from collections import defaultdict
+from contextlib import contextmanager
 from pathlib import Path
 
 try:
@@ -45,6 +46,7 @@ SUPPORTED_INPUT_FORMATS = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".w
 # Carpetas internas de wallpapers (no se procesan ni usa el slideshow)
 BACKUP_SUBDIR = "backup"
 DISCARDED_SUBDIR = "descartadas"
+LOCK_FILENAME = ".normalize-wallpapers.lock"
 
 
 def _eprint(message: str) -> None:
@@ -233,6 +235,22 @@ def is_eligible_for_slideshow(width: int, height: int, min_width: int, min_heigh
     return width >= min_width and height >= min_height
 
 
+def is_already_normalized_jpg(
+    image_path: Path,
+    width: int,
+    height: int,
+    target_width: int,
+    target_height: int,
+) -> bool:
+    """
+    Detecta JPG ya normalizados al tamaño objetivo para mantener idempotencia.
+
+    Solo se omiten archivos con extensión .jpg exacta: los .jpeg siguen el flujo
+    normal para conservar la salida estándar del script en .jpg.
+    """
+    return image_path.suffix.lower() == ".jpg" and width == target_width and height == target_height
+
+
 def get_unique_path(base_path: Path) -> Path:
     """
     Devuelve una ruta de archivo libre, añadiendo sufijo incremental si existe.
@@ -252,6 +270,47 @@ def get_unique_path(base_path: Path) -> Path:
         if not candidate.exists():
             return candidate
         n += 1
+
+
+@contextmanager
+def folder_execution_lock(base_dir: Path):
+    """
+    Aplica un lock exclusivo por carpeta para evitar dos ejecuciones simultáneas.
+
+    Raises:
+        RuntimeError: Si ya hay otra instancia en ejecución o no se puede crear el lock.
+    """
+    lock_path = base_dir / LOCK_FILENAME
+    lock_fd: int | None = None
+    lock_created = False
+
+    try:
+        lock_fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        lock_created = True
+        os.write(lock_fd, f"pid={os.getpid()}\n".encode("utf-8"))
+    except FileExistsError as e:
+        raise RuntimeError(
+            f"Ya hay otra instancia ejecutándose en {base_dir}. "
+            f"Si no hay ningún proceso activo, borra {lock_path.name} y reintenta."
+        ) from e
+    except OSError as e:
+        raise RuntimeError(f"No se pudo crear el lock en {base_dir}: {e}") from e
+
+    try:
+        yield
+    finally:
+        if lock_fd is not None:
+            try:
+                os.close(lock_fd)
+            except OSError:
+                pass
+        if lock_created:
+            try:
+                lock_path.unlink()
+            except FileNotFoundError:
+                pass
+            except OSError as e:
+                _eprint(f"  [AVISO] No se pudo eliminar el lock {lock_path.name}: {e}")
 
 
 def main() -> None:
@@ -319,25 +378,42 @@ def main() -> None:
     except RuntimeError as e:
         _eprint(f"Error: {e}")
         sys.exit(1)
+    except OSError as e:
+        if path_arg is not None:
+            _eprint(f"Error: no se pudo resolver la ruta indicada ({path_arg}): {e}")
+        else:
+            _eprint(f"Error: no se pudo acceder a la ruta de wallpapers: {e}")
+        sys.exit(1)
     backup_dir = wallpapers_dir / BACKUP_SUBDIR
     discarded_dir = wallpapers_dir / DISCARDED_SUBDIR
 
-    if not wallpapers_dir.exists():
+    try:
+        wallpapers_exists = wallpapers_dir.exists()
+        wallpapers_is_dir = wallpapers_dir.is_dir()
+    except OSError as e:
+        _eprint(f"Error: no se pudo acceder a {wallpapers_dir}: {e}")
+        sys.exit(1)
+
+    if not wallpapers_exists:
         _eprint(f"Error: No existe {wallpapers_dir}")
         if args.path is None:
             _eprint("  Ejecuta primero install.ps1 o usa --path para otra carpeta.")
         sys.exit(1)
 
-    if not wallpapers_dir.is_dir():
+    if not wallpapers_is_dir:
         _eprint(f"Error: La ruta no es un directorio: {wallpapers_dir}")
         sys.exit(1)
 
     # Solo archivos en la raíz (no subcarpetas); se ignoran enlaces simbólicos por seguridad.
     # Orden estable por nombre para resultados reproducibles si hay colisiones de nombre base.
-    image_files = sorted(
-        (f for f in wallpapers_dir.iterdir() if f.is_file() and not f.is_symlink() and f.suffix.lower() in SUPPORTED_INPUT_FORMATS),
-        key=lambda p: p.name.casefold(),
-    )
+    try:
+        image_files = sorted(
+            (f for f in wallpapers_dir.iterdir() if f.is_file() and not f.is_symlink() and f.suffix.lower() in SUPPORTED_INPUT_FORMATS),
+            key=lambda p: p.name.casefold(),
+        )
+    except OSError as e:
+        _eprint(f"Error: no se pudo listar el contenido de {wallpapers_dir}: {e}")
+        sys.exit(1)
 
     if not image_files:
         _eprint(f"No se encontraron imágenes en {wallpapers_dir} (salida 0: nada que hacer).")
@@ -374,62 +450,74 @@ def main() -> None:
             print(f"  - {f.name}: {status}")
         sys.exit(0)
 
-    # Crear carpetas backup y descartadas
-    backup_dir.mkdir(parents=True, exist_ok=True)
-    discarded_dir.mkdir(parents=True, exist_ok=True)
-
     processed_count = 0
     discarded_count = 0
     error_count = 0
 
     try:
-        for img_path in image_files:
+        with folder_execution_lock(wallpapers_dir):
+            # Crear carpetas backup y descartadas dentro del lock para evitar carreras.
             try:
-                dims = get_image_dimensions(img_path)
-                if dims is None:
-                    _eprint(f"  [ERROR] {img_path.name}: no se pudo leer")
-                    error_count += 1
-                    continue
-
-                width, height = dims
-
-                if not is_eligible_for_slideshow(width, height, args.width, args.height):
-                    dest = get_unique_path(discarded_dir / img_path.name)
-                    shutil.move(str(img_path), str(dest))
-                    print(f"  [DESCARTADA] {img_path.name} ({width}x{height}) -> {DISCARDED_SUBDIR}/")
-                    discarded_count += 1
-                    continue
-
-                backup_path = get_unique_path(backup_dir / img_path.name)
-                shutil.move(str(img_path), str(backup_path))
-                output_path = get_unique_path(wallpapers_dir / (img_path.stem + ".jpg"))
-
-                if normalize_image(
-                    backup_path,
-                    output_path,
-                    args.width,
-                    args.height,
-                    args.quality,
-                    DEFAULT_OUTPUT_FORMAT,
-                ):
-                    processed_count += 1
-                    print(f"  [OK] {img_path.name} ({width}x{height}) -> {output_path.name}")
-                else:
-                    if output_path.exists():
-                        try:
-                            output_path.unlink()
-                        except OSError:
-                            pass
-                    try:
-                        shutil.move(str(backup_path), str(img_path))
-                        error_count += 1
-                        _eprint(f"  [ERROR] {img_path.name}: fallo al procesar, restaurado")
-                    except OSError as move_err:
-                        error_count += 1
-                        _eprint(f"  [ERROR] {img_path.name}: fallo al procesar; original en {BACKUP_SUBDIR}/{backup_path.name} ({move_err})")
+                backup_dir.mkdir(parents=True, exist_ok=True)
+                discarded_dir.mkdir(parents=True, exist_ok=True)
             except OSError as e:
-                _eprint(f"  [ERROR] {img_path.name}: {e}")
-                error_count += 1
+                _eprint(f"Error: no se pudieron crear carpetas internas en {wallpapers_dir}: {e}")
+                sys.exit(1)
+
+            for img_path in image_files:
+                try:
+                    dims = get_image_dimensions(img_path)
+                    if dims is None:
+                        _eprint(f"  [ERROR] {img_path.name}: no se pudo leer")
+                        error_count += 1
+                        continue
+
+                    width, height = dims
+
+                    if not is_eligible_for_slideshow(width, height, args.width, args.height):
+                        dest = get_unique_path(discarded_dir / img_path.name)
+                        shutil.move(str(img_path), str(dest))
+                        print(f"  [DESCARTADA] {img_path.name} ({width}x{height}) -> {DISCARDED_SUBDIR}/")
+                        discarded_count += 1
+                        continue
+
+                    if is_already_normalized_jpg(img_path, width, height, args.width, args.height):
+                        print(f"  [OMITIDA] {img_path.name} ({width}x{height}) ya está normalizada")
+                        continue
+
+                    backup_path = get_unique_path(backup_dir / img_path.name)
+                    shutil.move(str(img_path), str(backup_path))
+                    output_path = get_unique_path(wallpapers_dir / (img_path.stem + ".jpg"))
+
+                    if normalize_image(
+                        backup_path,
+                        output_path,
+                        args.width,
+                        args.height,
+                        args.quality,
+                        DEFAULT_OUTPUT_FORMAT,
+                    ):
+                        processed_count += 1
+                        print(f"  [OK] {img_path.name} ({width}x{height}) -> {output_path.name}")
+                    else:
+                        if output_path.exists():
+                            try:
+                                output_path.unlink()
+                            except OSError:
+                                pass
+                        try:
+                            shutil.move(str(backup_path), str(img_path))
+                            error_count += 1
+                            _eprint(f"  [ERROR] {img_path.name}: fallo al procesar, restaurado")
+                        except OSError as move_err:
+                            error_count += 1
+                            _eprint(f"  [ERROR] {img_path.name}: fallo al procesar; original en {BACKUP_SUBDIR}/{backup_path.name} ({move_err})")
+                except OSError as e:
+                    _eprint(f"  [ERROR] {img_path.name}: {e}")
+                    error_count += 1
+    except RuntimeError as e:
+        _eprint(f"Error: {e}")
+        sys.exit(1)
     except KeyboardInterrupt:
         _eprint("\nInterrupción por el usuario (Ctrl+C). Revisa backup/ por archivos ya movidos.")
         sys.exit(130)
