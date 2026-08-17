@@ -41,36 +41,9 @@ del slideshow. Para una ruta personalizada se usa una carpeta hermana
 
 ### Cómo ejecutarlo
 
-#### 1. Desde el repositorio (Python 3.10+, con Pillow instalado)
-
-`pip install -e .` requiere el `pyproject.toml` en la raíz del clon (incluido en el repositorio).
-
-```powershell
-cd ruta\al\repo\w11-nasa-theme
-pip install -e .
-python scripts/normalize-wallpapers.py --dry-run   # simular sin tocar archivos
-python scripts/normalize-wallpapers.py             # carpeta instalada del tema NASA
-python scripts/normalize-wallpapers.py --path "D:\MisWallpapers"
-python scripts/normalize-wallpapers.py --force-unlock  # sólo para un lock obsoleto
-```
-
-#### 2. Ejecutable opcional (sin Python en la máquina de destino)
-
+#### Ejecutable
 El repositorio publica el ejecutable junto a
-`NASA-Normalize-Wallpapers.exe.sha256`. Para regenerarlos:
-
-```powershell
-.\scripts\build-normalize-exe.ps1
-# Actualizar primero las versiones bloqueadas:
-.\scripts\build-normalize-exe.ps1 -RefreshLock
-```
-
-El build usa `scripts/requirements-build.lock`, fija las variables de
-reproducibilidad y comprueba el hash. Dos builds consecutivos con las mismas
-fuentes y entorno deben producir el mismo SHA-256.
+`NASA-Normalize-Wallpapers.exe.sha256`.
 
 En equipos con Windows Application Control, un ejecutable local sin firma puede
-ser bloqueado por política. En ese caso usá directamente el script Python; el
-checksum verifica integridad, pero no sustituye una firma de código.
-
-**Códigos de salida (Python):** `0` éxito (incluye «no había imágenes que procesar»); `1` si hubo errores al procesar; `130` si cancelaste con Ctrl+C. No conviene lanzar dos instancias a la vez sobre la misma carpeta.
+ser bloqueado por política.
