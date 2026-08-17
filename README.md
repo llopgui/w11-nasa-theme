@@ -73,12 +73,8 @@ que se haya activado el modo claro.
 ```text
 w11-nasa-theme/
 ├── install.ps1                    # Lanzador → delega en scripts/install.ps1
-├── pyproject.toml                 # Metadatos Python (Pillow; grupo opcional build)
 ├── scripts/
 │   ├── install.ps1                # Instalador completo del tema
-│   ├── NasaThemeInstaller.psm1    # Operaciones transaccionales y verificaciones
-│   ├── normalize-wallpapers.py    # Homogeneiza wallpapers (requiere Python + Pillow)
-│   └── build-normalize-exe.ps1    # Genera y publica .exe + SHA-256
 ├── themes/
 │   ├── NASA_Tema_Oscuro.theme
 │   └── NASA_Tema_Claro.theme
@@ -92,7 +88,6 @@ w11-nasa-theme/
 │   │   └── w11-tail-cursor-concept-free/
 │   └── sounds/
 │       └── README.md
-├── tests/                          # Pester y pytest
 ├── CREDITS.md
 ├── LICENSE
 └── README.md
@@ -102,10 +97,6 @@ w11-nasa-theme/
 
 - **Windows 11**
 - **PowerShell 5.1+** (incluido en Windows)
-
-**Opcional** (solo si usás el normalizador o generás el `.exe`):
-
-- **Python 3.10+** y dependencias del proyecto (`pip install -e .` o el script de build, que crea `.venv`). El archivo `pyproject.toml` está en la **raíz del repositorio** en el clon público; si tu editor no lo muestra, puede estar oculto por reglas locales (`.cursorignore` / equivalentes).
 
 ## Scripts y flujo habitual
 
