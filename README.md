@@ -107,10 +107,8 @@ w11-nasa-theme/
 | Desinstalar y restaurar | `.\install.ps1 -Action Uninstall` |
 | Simular una operación | Añadir `-WhatIf` |
 | Recalcular el acento automático | Reparar el tema después de cambiar wallpapers |
-| Igualar tamaño/formato de wallpapers nuevos | Ver [README de wallpapers](assets/wallpapers/README.md) (`normalize-wallpapers.py` o el `.exe` opcional) |
+| Igualar tamaño/formato de wallpapers nuevos | Ver [README de wallpapers](assets/wallpapers/README.md) |
 | Validar contraste de colores del tema | Revisión manual con los criterios indicados en este README |
-| Generar `NASA-Normalize-Wallpapers.exe` | `.\scripts\build-normalize-exe.ps1` (publica también checksum) |
-| Actualizar dependencias del build | `.\scripts\build-normalize-exe.ps1 -RefreshLock` |
 
 ## Criterio de contraste y paleta
 
