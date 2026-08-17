@@ -1,0 +1,95 @@
+; =============================================================================
+; NASA Theme - Tema Claro (Light Mode)
+; Inspirado en la paleta oficial de la NASA Web Design System
+; Colores: White (#ffffff), Primary Blue (#105bd8), Gray Light (#aeb0b5)
+; =============================================================================
+
+[Theme]
+DisplayName=NASA Space - Tema Claro
+
+[MasterThemeSelector]
+MTSM=DABJDKT
+
+[Control Panel\Desktop]
+TileWallpaper=0
+WallpaperStyle=10
+Pattern=
+ScreenSaveActive=0
+; Windows calcula siempre el color de énfasis desde el wallpaper.
+AutoColorization=1
+
+[Slideshow]
+; Cambia de wallpaper cada 10 minutos (600000 ms)
+Interval=600000
+Shuffle=1
+ImagesRootPath=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Slideshow
+
+[Control Panel\Colors]
+; Paleta NASA - Tema Claro Espacial
+; Background: blanco NASA (#ffffff)
+Background=255 255 255
+; Ventanas: gris muy claro (#f1f1f1)
+Window=241 241 241
+WindowText=33 33 33
+; Barra de título activa: azul NASA (#105bd8)
+ActiveTitle=16 91 216
+TitleText=255 255 255
+Hilight=16 91 216
+HilightText=255 255 255
+; Barra de título inactiva: neutral NASA (#d6d7d9)
+InactiveTitle=214 215 217
+InactiveTitleText=33 33 33
+; Botones y controles
+ButtonFace=241 241 241
+ButtonText=33 33 33
+ButtonShadow=214 215 217
+ButtonHilight=2 191 231
+ButtonDkShadow=91 97 107
+ButtonLight=255 255 255
+; Menús
+Menu=255 255 255
+MenuText=33 33 33
+; Barras de desplazamiento
+Scrollbar=214 215 217
+; Bordes
+WindowFrame=16 91 216
+ActiveBorder=16 91 216
+InactiveBorder=214 215 217
+; Otros elementos
+AppWorkspace=220 228 239
+; Texto secundario con contraste funcional sobre superficies claras.
+GrayText=91 97 107
+InfoWindow=255 255 255
+InfoText=33 33 33
+GradientActiveTitle=16 91 216
+GradientInactiveTitle=214 215 217
+
+[Control Panel\Cursors]
+; Cursores personalizados desde la variante clara (si existen)
+Arrow=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\arrow.cur
+Help=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\help.cur
+Hand=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\hand.cur
+AppStarting=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\appstarting.ani
+Wait=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\wait.ani
+NWPen=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\nwpen.cur
+No=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\no.cur
+SizeNS=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\sizens.cur
+SizeWE=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\sizewe.cur
+Crosshair=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\crosshair.cur
+IBeam=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\ibeam.cur
+SizeNWSE=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\sizenwse.cur
+SizeNESW=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\sizenesw.cur
+SizeAll=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\sizeall.cur
+UpArrow=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\uparrow.cur
+Person=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\person.cur
+Pin=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\light\pin.cur
+DefaultValue=NASA Space Light
+; Los sonidos se inyectan dinámicamente durante la instalación solo si existen archivos WAV.
+
+[VisualStyles]
+Path=%SystemRoot%\Resources\Themes\Aero\Aero.msstyles
+ColorStyle=NormalColor
+Size=NormalSize
+Transparency=1
+AppMode=Light
+SystemMode=Light

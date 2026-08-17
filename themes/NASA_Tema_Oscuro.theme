@@ -1,0 +1,97 @@
+; =============================================================================
+; NASA Theme - Tema Oscuro (Dark Mode)
+; Inspirado en la paleta oficial de la NASA Web Design System
+; Colores: Primary Darkest (#061f4a), Primary Blue (#105bd8), Primary Alt (#02bfe7)
+; =============================================================================
+
+[Theme]
+DisplayName=NASA Space - Tema Oscuro
+
+[MasterThemeSelector]
+MTSM=DABJDKT
+
+[Control Panel\Desktop]
+TileWallpaper=0
+; WallpaperStyle=10: ajustar y recortar manteniendo proporción
+WallpaperStyle=10
+Pattern=
+ScreenSaveActive=0
+; Windows calcula siempre el color de énfasis desde el wallpaper.
+AutoColorization=1
+
+[Slideshow]
+; Cambia de wallpaper cada 10 minutos (600000 ms)
+Interval=600000
+Shuffle=1
+ImagesRootPath=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Slideshow
+
+[Control Panel\Colors]
+; Paleta NASA - Tema Oscuro tokenizada (consistencia con referencia visual)
+; Background: primary-darkest (#061f4a)
+Background=6 31 74
+; Ventanas: base oscuro (#212121)
+Window=33 33 33
+WindowText=241 241 241
+; Barra de título activa: azul NASA (#0b3d91)
+ActiveTitle=11 61 145
+TitleText=255 255 255
+Hilight=16 91 216
+HilightText=255 255 255
+; Barra de título inactiva: gris NASA oscuro (#323a45)
+InactiveTitle=50 58 69
+InactiveTitleText=174 176 181
+; Botones y controles: gris NASA oscuro (#323a45)
+ButtonFace=50 58 69
+ButtonText=241 241 241
+ButtonShadow=6 31 74
+ButtonHilight=2 191 231
+ButtonDkShadow=6 31 74
+ButtonLight=91 97 107
+; Menús: igual que ventanas
+Menu=33 33 33
+MenuText=241 241 241
+; Barras de desplazamiento
+Scrollbar=50 58 69
+; Bordes: acento azul NASA
+WindowFrame=16 91 216
+ActiveBorder=16 91 216
+InactiveBorder=50 58 69
+; Otros elementos
+AppWorkspace=6 31 74
+; Texto secundario: se mantiene por encima de contraste funcional en oscuro.
+GrayText=174 176 181
+InfoWindow=33 33 33
+InfoText=241 241 241
+GradientActiveTitle=11 61 145
+GradientInactiveTitle=50 58 69
+
+[Control Panel\Cursors]
+; Cursores personalizados desde la variante oscura (si existen)
+Arrow=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\arrow.cur
+Help=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\help.cur
+Hand=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\hand.cur
+AppStarting=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\appstarting.ani
+Wait=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\wait.ani
+NWPen=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\nwpen.cur
+No=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\no.cur
+SizeNS=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\sizens.cur
+SizeWE=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\sizewe.cur
+Crosshair=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\crosshair.cur
+IBeam=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\ibeam.cur
+SizeNWSE=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\sizenwse.cur
+SizeNESW=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\sizenesw.cur
+SizeAll=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\sizeall.cur
+UpArrow=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\uparrow.cur
+Person=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\person.cur
+Pin=%LOCALAPPDATA%\Microsoft\Windows\Themes\NASA_Desktop\Cursors\dark\pin.cur
+DefaultValue=NASA Space Dark
+; Los sonidos se inyectan dinámicamente durante la instalación solo si existen archivos WAV.
+
+[VisualStyles]
+; Windows 11 usa Aero.msstyles
+Path=%SystemRoot%\Resources\Themes\Aero\Aero.msstyles
+ColorStyle=NormalColor
+Size=NormalSize
+Transparency=0
+AppMode=Dark
+SystemMode=Dark
